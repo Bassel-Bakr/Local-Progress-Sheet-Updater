@@ -46,6 +46,7 @@ def handle_exception(exc_type, exc_value, exc_traceback):
 
 class LambdaDispatchEventHandler(FileSystemEventHandler):
     def __init__(self, config: Config, func):
+        self.config = config
         self.func = func
 
     def on_any_event(self, event):

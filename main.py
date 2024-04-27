@@ -234,7 +234,7 @@ def main():
         observer = Observer()
         if config.game == "Kovaaks":
             event_handler = LambdaDispatchEventHandler(
-                config, lambda: kovaaks.process_files_kovaaks()
+                config, lambda: kovaaks.process_files()
             )
             observer.schedule(event_handler, config.stats_path)
         elif config.game == "Aimlab":

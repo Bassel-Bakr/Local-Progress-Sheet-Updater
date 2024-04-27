@@ -29,6 +29,9 @@ from conf import AIMLAB_DB_PATH, Config
 from utils import debounce, handle_exception, LambdaDispatchEventHandler
 
 
+sheet_api = create_service()
+
+
 def init_scenario_data_aimlab(
     config: Config, sheet_api: googleapiclient.discovery.Resource
 ) -> dict:
@@ -200,8 +203,6 @@ def main():
         handle_error("no_credentials")
 
     logging.debug("Creating service...")
-
-    sheet_api = create_service()
 
     kovaaks: Kovaaks
 

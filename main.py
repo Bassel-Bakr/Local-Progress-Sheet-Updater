@@ -19,6 +19,7 @@ from errors import handle_error
 from gui import Gui
 from sheets import create_service, read_sheet_range, validate_sheet_range, write_to_cell
 from conf import AIMLAB_DB_PATH, Config
+from utils import debounce, handle_exception, LambdaDispatchEventHandler
 
 
 @dataclass
@@ -291,42 +292,6 @@ def init_cs_level_ids_and_blacklist() -> (dict, dict):
     return cs_level_ids, blacklist
 
 
-class LambdaDispatchEventHandler(FileSystemEventHandler):
-
-    def __init__(self, func):
-        self.func = func
-
-    def on_any_event(self, event):
-        if event.is_directory:
-            return None
-        elif event.event_type == "modified":
-            if config.game == "Kovaaks" or event.src_path.endswith("klutch.bytes"):
-                self.func()
-
-
-def debounce(wait):
-    """Decorator that will postpone a functions
-    execution until after wait seconds
-    have elapsed since the last time it was invoked.
-    https://gist.github.com/walkermatt/2871026"""
-
-    def decorator(fn):
-        def debounced(*args, **kwargs):
-            def call_it():
-                fn(*args, **kwargs)
-
-            try:
-                debounced.t.cancel()
-            except AttributeError:
-                pass
-            debounced.t = Timer(wait, call_it)
-            debounced.t.start()
-
-        return debounced
-
-    return decorator
-
-
 @debounce(5)
 def process_files_kovaaks():
     global config, sheet_api, blacklist, scenarios, stats
@@ -342,20 +307,6 @@ def process_files_aimlab():
     global config, sheet_api, scenarios, cs_level_ids, blacklist
 
     update_aimlab(config, scenarios, cs_level_ids, blacklist)
-
-
-def handle_exception(exc_type, exc_value, exc_traceback):
-    """
-    Function that replaces sys.excepthook to also log uncaught exceptions, see:
-    https://stackoverflow.com/questions/6234405/logging-uncaught-exceptions-in-python/16993115#16993115
-    """
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-
-    logging.critical(
-        "Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback)
-    )
 
 
 def main():
@@ -403,10 +354,14 @@ def main():
     elif config.run_mode == "watchdog":
         observer = Observer()
         if config.game == "Kovaaks":
-            event_handler = LambdaDispatchEventHandler(lambda: process_files_kovaaks())
+            event_handler = LambdaDispatchEventHandler(
+                config, lambda: process_files_kovaaks()
+            )
             observer.schedule(event_handler, config.stats_path)
         elif config.game == "Aimlab":
-            event_handler = LambdaDispatchEventHandler(lambda: process_files_aimlab())
+            event_handler = LambdaDispatchEventHandler(
+                config, lambda: process_files_aimlab()
+            )
             observer.schedule(event_handler, os.path.join(AIMLAB_DB_PATH, os.pardir))
         observer.start()
         try:

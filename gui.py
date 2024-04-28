@@ -15,6 +15,7 @@ class Gui:
             self.window.title("Progress Sheet Updater - Configurator")
             self.window.geometry("890x400")
             self.path = StringVar()
+            self.aimlab_db_path = StringVar()
             self.sheet_id_kovaaks = StringVar()
             self.sheet_id_aimlab = StringVar()
             self.calculate_averages = IntVar()
@@ -39,6 +40,7 @@ class Gui:
             self.sheet_id_aimlab.set(self.config.sheet_id_aimlab)
             self.polling_interval.set(self.config.polling_interval)
             self.path.set(self.config.stats_path)
+            self.aimlab_db_path.set(self.config.aimlab_db_path)
             self.runs_to_average.set(self.config.num_of_runs_to_average)
             self.open_config.set(int(self.config.open_config))
             self.run_mode.set(self.config.run_mode)
@@ -49,6 +51,13 @@ class Gui:
     def browse_path(self):
         self.path.set(
             filedialog.askdirectory(initialdir=self.path.get(), title="Open Folder")
+        )
+
+    def browse_file(self):
+        self.aimlab_db_path.set(
+            filedialog.askopenfilename(
+                initialdir=self.aimlab_db_path.get(), title="Open File"
+            )
         )
 
     def new_range(self):
@@ -87,6 +96,7 @@ class Gui:
 
     def finished(self):
         self.config.stats_path = self.path.get()
+        self.config.aimlab_db_path = self.aimlab_db_path.get()
         if self.sheet_id_kovaaks.get().find("docs.google.com") != -1:
             full_link = self.sheet_id_kovaaks.get()
             id_temp = full_link[full_link.find("/d/") + 3 :]
@@ -152,6 +162,22 @@ class Gui:
 
             # Aimlab tab of the notebook
             aimlab_frame = Frame(self.notebook)
+
+            # Gui for klutch db path
+            aimlab_db_path_frame = Frame(aimlab_frame)
+            pre_aimlab_db_path_label = Label(
+                aimlab_db_path_frame, text="Aimlab's DB Path: "
+            )
+            browse_aimlab_db_path_button = Button(
+                aimlab_db_path_frame, text="Browse", command=self.browse_file
+            )
+            aimlab_db_path_label = Label(
+                aimlab_db_path_frame, textvariable=self.aimlab_db_path
+            )
+            pre_aimlab_db_path_label.pack(side="left")
+            aimlab_db_path_label.pack(side="left")
+            browse_aimlab_db_path_button.pack(side="right")
+            aimlab_db_path_frame.pack(fill="x")
 
             # Gui for sheetid of Aimlab sheet
             sheet_id_frame_aimlab = Frame(aimlab_frame)

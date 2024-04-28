@@ -25,7 +25,7 @@ from sheets import (
     read_sheet_range,
     write_to_cell,
 )
-from conf import AIMLAB_DB_PATH, Config
+from conf import Config
 from utils import debounce, handle_exception, LambdaDispatchEventHandler
 
 
@@ -82,7 +82,7 @@ def update_aimlab(
     new_avgs = set()
 
     # Open db connection
-    con = sqlite3.connect(AIMLAB_DB_PATH)
+    con = sqlite3.connect(config.aimlab_db_path)
     cur = con.cursor()
 
     # Get scores from the database
@@ -242,7 +242,9 @@ def main():
             event_handler = LambdaDispatchEventHandler(
                 config, lambda: process_files_aimlab()
             )
-            observer.schedule(event_handler, os.path.join(AIMLAB_DB_PATH, os.pardir))
+            observer.schedule(
+                event_handler, os.path.join(config.aimlab_db_path, os.pardir)
+            )
         observer.start()
         try:
             while True:

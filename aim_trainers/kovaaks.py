@@ -3,6 +3,7 @@ from datetime import datetime
 import logging
 import os
 import googleapiclient.discovery
+import urllib.request
 
 from aim_trainers.aim_trainer import AimTrainer
 from conf import Config
@@ -16,23 +17,18 @@ class Kovaaks(AimTrainer):
         self,
         config: Config,
         sheet_api: googleapiclient.discovery.Resource,
-        blacklist: dict,
-        stats: list[str],
     ):
         AimTrainer.__init__(self, sheet_api=sheet_api)
         self.config = config
         self.sheet_api = sheet_api
-        self.blacklist = blacklist
-        self.stats = stats
+        self.blacklist = self.init_version_blacklist()
+        self.stats = list(sorted(os.listdir(config.stats_path)))
         self.scenarios = self.init_scenario_data()
 
     def process_files(self):
         AimTrainer.process_files(self)
 
-        new_stats = os.listdir(self.config.stats_path)
-        unprocessed = list(sorted([f for f in new_stats if f not in self.stats]))
-        self.update(unprocessed)
-        self.stats = new_stats
+        self.update()
 
     def init_scenario_data(self):
         AimTrainer.init_scenario_data(self)
@@ -83,8 +79,11 @@ class Kovaaks(AimTrainer):
 
         return scens
 
-    def update(self, files: list[str]):
-        AimTrainer.update(self, files)
+    def update(self):
+        AimTrainer.update(self)
+
+        new_stats = os.listdir(self.config.stats_path)
+        files = list(sorted([f for f in new_stats if f not in self.stats]))
 
         new_hs = set()
         new_avgs = set()
@@ -129,9 +128,28 @@ class Kovaaks(AimTrainer):
             new_hs, new_avgs, self.scenarios, self.config.sheet_id_kovaaks
         )
 
+        self.stats = new_stats
+
     def read_score_from_file(self, file_path: str) -> float:
         with open(file_path, newline="") as csvfile:
             for row in csv.reader(csvfile):
                 if row and row[0] == "Score:":
                     return round(float(row[1]), 1)
         return 0.0
+
+    def init_version_blacklist(self) -> dict:
+        logging.debug("Initializing version blacklist...")
+
+        url = "https://docs.google.com/spreadsheets/d/1uvXfx-wDsyPg5gM79NDTszFk-t6SL42seL-8dwDTJxw/gviz/tq?tqx=out:csv&sheet=Update_Dates"
+        response = urllib.request.urlopen(url)
+        lines = [l.decode("utf-8") for l in response.readlines()]
+        blacklist = dict()
+        for line in lines[1:]:
+            splits = line.split('","')
+            name = splits[0].replace('"', "")
+            date = datetime.strptime(
+                splits[1].replace('"', "").replace("\n", ""), "%d.%m.%Y"
+            ).date()
+            blacklist[name.lower()] = date
+
+        return blacklist

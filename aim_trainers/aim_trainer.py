@@ -21,7 +21,7 @@ class AimTrainer:
         pass
 
     @abstractmethod
-    def update(self, data: list[str]):
+    def update(self):
         pass
 
     def create_output(

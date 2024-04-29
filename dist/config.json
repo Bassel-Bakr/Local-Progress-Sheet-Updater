@@ -1,6 +1,6 @@
 {
   "stats_path": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\FPSAimTrainer\\FPSAimTrainer\\stats",
-  "aimlab_db_path": "C:\\Users\\Public\\AppData\\LocalLow\\Statespace\\aimlab_tb\\Users\\Default\\LocalDB\\klutch.bytes",
+  "aimlab_db_path": "C:\\Users\\Public\\AppData\\LocalLow\\Statespace\\aimlab_tb\\Users\\Default\\LocalDB",
   "sheet_id_kovaaks": "your_kovaaks_sheet_id_here",
   "sheet_id_aimlab": "your_aimlab_sheet_id_here",
   "scenario_name_ranges": [

@@ -79,15 +79,20 @@ class Aimlab(AimTrainer):
         new_hs = set()
         new_avgs = set()
 
+        # Aimlab has its data in /AppData/LocalLow/statespace/aimlab_tb/Users/[USER_ID]/LocalDB/klutch.bytes
+
+        db_path = f"{self.config.aimlab_db_path}/klutch.bytes"
         # Open db connection
-        con = sqlite3.connect(self.config.aimlab_db_path)
+        con = sqlite3.connect(db_path)
         cur = con.cursor()
 
         # Get scores from the database
         result = []
         for csid, name in self.cs_level_ids.items():
             cur.execute(
-                f"SELECT taskName, score FROM TaskData WHERE taskName = ? AND createDate > date(?)",
+                f"""SELECT taskName, score
+                FROM TaskData
+                WHERE taskName = ? AND createDate > date(?)""",
                 [csid, self.blacklist[name]],
             )
             temp = cur.fetchall()

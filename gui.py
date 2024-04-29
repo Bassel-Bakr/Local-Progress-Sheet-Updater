@@ -48,17 +48,11 @@ class Gui:
             self.game.set(self.config.game)
             self.game_options = ["Aimlab", "Kovaaks"]
 
-    def browse_path(self):
-        self.path.set(
-            filedialog.askdirectory(initialdir=self.path.get(), title="Open Folder")
-        )
+    def browse_path(self, initial_dir: str):
+        return filedialog.askdirectory(initialdir=initial_dir, title="Open Folder")
 
-    def browse_file(self):
-        self.aimlab_db_path.set(
-            filedialog.askopenfilename(
-                initialdir=self.aimlab_db_path.get(), title="Open File"
-            )
-        )
+    def browse_path_for(self, str_var: StringVar):
+        str_var.set(self.browse_path(str_var.get()))
 
     def new_range(self):
         self.range_frame_list.append(Frame(self.all_ranges_frame, padx=20))
@@ -140,7 +134,9 @@ class Gui:
             path_frame = Frame(self.kovaaks_frame)
             pre_path_label = Label(path_frame, text="Kovaak's Stats Path: ")
             browse_path_button = Button(
-                path_frame, text="Browse", command=self.browse_path
+                path_frame,
+                text="Browse",
+                command=lambda: self.browse_path_for(self.path),
             )
             path_label = Label(path_frame, textvariable=self.path)
             pre_path_label.pack(side="left")
@@ -169,7 +165,9 @@ class Gui:
                 aimlab_db_path_frame, text="Aimlab's DB Path: "
             )
             browse_aimlab_db_path_button = Button(
-                aimlab_db_path_frame, text="Browse", command=self.browse_file
+                aimlab_db_path_frame,
+                text="Browse",
+                command=lambda: self.browse_path_for(self.aimlab_db_path),
             )
             aimlab_db_path_label = Label(
                 aimlab_db_path_frame, textvariable=self.aimlab_db_path

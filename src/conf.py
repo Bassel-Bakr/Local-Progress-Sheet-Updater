@@ -1,31 +1,22 @@
 import json
 import os
-import pathlib
 import sys
 import logging
 from typing import List
 
-# determine if application is a script file or frozen exe
-if getattr(sys, "frozen", False):
-    PROJECT_DIR = pathlib.Path(sys.executable).parent.absolute()
-elif __file__:
-    PROJECT_DIR = pathlib.Path(__file__).parent.absolute()
-LOG_FILE_PATH = os.path.join(PROJECT_DIR, "logging.conf")
-SPREADSHEET_TOKEN_FILE_PATH = os.path.join(PROJECT_DIR, "token.pickle")
-SPREADSHEET_CREDENTIALS_FILE_PATH = os.path.join(PROJECT_DIR, "credentials.json")
+from constants import CONFIG_PATH
 
 
 class Config:
     def __init__(self):
-        config_file = "config.json"
-        if not os.path.isfile(config_file):
-            logging.error("Failed to find config file: %s", config_file)
+        if not os.path.isfile(CONFIG_PATH):
+            logging.error("Failed to find config file: %s", CONFIG_PATH)
             sys.exit(1)
 
-        self.config = json.load(open(config_file, "r"))
+        self.config = json.load(open(CONFIG_PATH, "r"))
 
     def save(self):
-        with open("config.json", "w") as outfile:
+        with open(CONFIG_PATH, "w") as outfile:
             json.dump(self.config, outfile, indent=4)
 
     def dump(self):

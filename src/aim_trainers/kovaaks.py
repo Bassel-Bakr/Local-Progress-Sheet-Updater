@@ -82,8 +82,7 @@ class Kovaaks(AimTrainer):
     def update(self):
         AimTrainer.update(self)
 
-        new_stats = os.listdir(self.config.stats_path)
-        files = list(sorted([f for f in new_stats if f not in self.stats]))
+        files = os.listdir(self.config.stats_path)
 
         new_hs = set()
         new_avgs = set()
@@ -128,7 +127,7 @@ class Kovaaks(AimTrainer):
             new_hs, new_avgs, self.scenarios, self.config.sheet_id_kovaaks
         )
 
-        self.stats = new_stats
+        self.stats = files
 
     def read_score_from_file(self, file_path: str) -> float:
         with open(file_path, newline="") as csvfile:
